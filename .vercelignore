@@ -1,0 +1,13 @@
+railway/
+vercel-research.md
+**/__pycache__/
+**/*.pyc
+**/*.test.py
+test_*.py
+tests/
+__tests__/
+*.zip
+*.log
+.env
+.env.*
+!.env.example
