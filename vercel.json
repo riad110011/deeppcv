@@ -1,14 +1,9 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "rewrites": [
-    { "source": "/health", "destination": "/api" },
-    { "source": "/docs", "destination": "/api" },
-    { "source": "/birth", "destination": "/api" }
-  ],
   "functions": {
-    "api/index.py": {
+    "index.py": {
       "maxDuration": 60,
-      "excludeFiles": "{railway/**,test_*.py,**/*.test.py,tests/**,__tests__/**,**/__pycache__/**,**/*.pyc}"
+      "excludeFiles": "{test_*.py,**/*.test.py,tests/**,__tests__/**,**/__pycache__/**,**/*.pyc}"
     }
   }
 }
