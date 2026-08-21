@@ -1,46 +1,40 @@
 # deeppcv
 
-`deeppcv` is a lightweight Flask API packaged for Vercel Python Functions. It provides `/`, `/health`, `/docs`, and `/birth` routes through the serverless function in `api/index.py`.
+`deeppcv` is a Vercel-compatible Flask serverless API. It exposes `/`, `/health`, `/docs`, and `/birth` through the Python Function in `api/index.py`.
 
-The Vercel function authenticates incoming requests, forwards `/birth` requests to the configured upstream verification API, and returns the upstream JSON response unchanged. This keeps the Vercel bundle small and avoids placing credentials or host-specific OCR binaries in the repository.
+The bridge authenticates incoming requests, forwards `/birth` requests to the configured birth-verification service, and returns the upstream JSON response unchanged. The current temporary upstream URL is included as a replaceable code default, so the only required Vercel environment variable is `API_KEY`.
 
-## Repository layout
+## Files
 
 | Path | Purpose |
 |---|---|
-| `api/index.py` | Vercel Python Function exposing the API routes. |
-| `vercel.json` | Routes the public paths to the serverless function and configures its maximum duration. |
-| `requirements.txt` | Flask and requests dependencies for Vercel. |
-| `.env.example` | Safe environment-variable template without secrets. |
+| `api/index.py` | Flask application loaded by Vercel as a Python Function. |
+| `vercel.json` | Routes `/`, `/health`, `/docs`, and `/birth` to the Function. |
+| `requirements.txt` | Minimal Flask and requests dependencies. |
+| `.env.example` | Contains only the `API_KEY` placeholder. |
 | `test_vercel_bridge.py` | Local regression test for authentication and upstream forwarding. |
 
-## Vercel environment variables
+## Vercel setup
 
-Configure these values in Vercel Project Settings. Do not commit them to GitHub.
+Import this repository into Vercel, keep the repository root as the project root, and add one environment variable:
 
-| Variable | Required | Description |
-|---|---:|---|
-| `API_KEY` | Yes | API key accepted by the public Vercel endpoint. |
-| `UPSTREAM_API_URL` | Yes | Full upstream `/birth` URL. |
-| `UPSTREAM_API_KEY` | Recommended | Key used when calling the upstream API. If omitted, the bridge uses `API_KEY`. |
-| `ALLOW_QUERY_API_KEY` | Optional | Defaults to `true` for temporary `?api=...` testing. Set to `false` for production and use `X-API-Key`. |
-| `HTTP_TIMEOUT_SECONDS` | Optional | Upstream request timeout; defaults to 25 seconds. |
+```text
+API_KEY=your-api-key
+```
 
-## Deploying to Vercel
+The current default upstream is the temporary birth API used for testing. To replace it later without changing the public API, add `UPSTREAM_API_URL` and, when needed, `UPSTREAM_API_KEY` as optional Vercel environment variables. Environment variables are preferred for secrets because they remain outside the source code.
 
-Import this GitHub repository into Vercel, keep the repository root as the project root, add the environment variables for Production and Preview, and deploy. Vercel detects the Python Function from `api/index.py`.
-
-A temporary query-parameter test request has this form:
+A temporary test request has this form:
 
 ```text
 https://YOUR-VERCEL-DOMAIN.vercel.app/birth?brn=YOUR_BRN&dob=YYYY-MM-DD&api=YOUR_API_KEY
 ```
 
-For production, prefer the header form:
+For production, set `ALLOW_QUERY_API_KEY=false` and use the recommended header form:
 
 ```bash
 curl -H "X-API-Key: YOUR_API_KEY" \
   "https://YOUR-VERCEL-DOMAIN.vercel.app/birth?brn=YOUR_BRN&dob=YYYY-MM-DD"
 ```
 
-The Vercel version is a serverless bridge. It does not include a local OCR engine; set `UPSTREAM_API_URL` to the full deployed verification service that performs OCR and record extraction. This separation keeps the Vercel Function lightweight and its secrets configurable through Vercel Environment Variables.
+The actual API key is not included in this repository. Vercel applies environment-variable changes only to new deployments, so redeploy after changing a variable.

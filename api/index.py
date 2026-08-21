@@ -8,7 +8,10 @@ from flask import Flask, jsonify, request, Response
 app = Flask(__name__)
 
 PUBLIC_API_KEY = os.getenv("API_KEY", "").strip()
-UPSTREAM_API_URL = os.getenv("UPSTREAM_API_URL", "").strip().rstrip("/")
+UPSTREAM_API_URL = os.getenv(
+    "UPSTREAM_API_URL",
+    "https://18082-ii8kekemceblzi10mjavl-6b7bb924.us3.manus.computer/birth",
+).strip().rstrip("/")
 UPSTREAM_API_KEY = os.getenv("UPSTREAM_API_KEY", "").strip() or PUBLIC_API_KEY
 HTTP_TIMEOUT_SECONDS = max(5, int(os.getenv("HTTP_TIMEOUT_SECONDS", "25")))
 ALLOW_QUERY_API_KEY = os.getenv("ALLOW_QUERY_API_KEY", "true").strip().lower() in {
@@ -75,7 +78,7 @@ def docs():
                 },
             },
         },
-        "deployment_note": "Set API_KEY, UPSTREAM_API_URL, and UPSTREAM_API_KEY as Vercel environment variables.",
+        "deployment_note": "Only API_KEY is required for the current temporary upstream. UPSTREAM_API_URL and UPSTREAM_API_KEY are optional overrides for a future permanent upstream.",
     })
 
 
